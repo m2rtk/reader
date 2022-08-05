@@ -1,0 +1,26 @@
+body {
+  font: 13px Arial;
+  line-height: 1.625;
+  padding: 0 0.6em;
+  margin: 0;
+}
+
+p {
+  margin-bottom: 1.625em;
+}
+#content {
+  margin: 0 7.6%;
+}
+.entry-content {
+  padding: 1.625em 0 0;
+}
+.entry-title {
+  font-size: 28px;
+  font-weight: bold;
+  padding-top: 1.625em;
+}
+
+.flex {
+  display: flex;
+  justify-content: space-around;
+}

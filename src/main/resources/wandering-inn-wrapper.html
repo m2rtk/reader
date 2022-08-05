@@ -1,26 +1,20 @@
 <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-<style type="text/css">
-body {
-  font: 13px Arial;
-  line-height: 1.625;
-  padding: 0 0.6em;
-  margin: 0;
-}
-p {
-  margin-bottom: 1.625em;
-}
-#content {
-  margin: 0 7.6%;
-}
-.entry-content {
-  padding: 1.625em 0 0;
-}
-.entry-title {
-  font-size: 28px;
-  font-weight: bold;
-}
-</style>
-<a href="${ORIGINAL_URL}">original</a>
+<link rel="stylesheet" href="/reset.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/main.css">
+<script lang="js">
+    function toggleStyle() {
+      fetch("/style", { method: 'POST' })
+        .then(res => { window.location.reload(); });
+    }
+</script>
+
+<div class="flex">
+<button id="toggle-style" onclick="toggleStyle()">Style</button>
+<a href="${ORIGINAL_URL}">Original</a>
+<a href="/wandering-inn">Table of contents</a>
+</div>
+
 <div id="content">
     ${CONTENT}
 </div>

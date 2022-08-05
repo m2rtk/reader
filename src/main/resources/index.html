@@ -1,4 +1,16 @@
 <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+<link rel="stylesheet" href="/reset.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/main.css">
+<script lang="js">
+    function toggleStyle() {
+      fetch("/style", { method: 'POST' })
+        .then(res => { window.location.reload(); });
+    }
+</script>
+
 <ul>
     <li><a href="/wandering-inn">Wandering Inn</a></li>
 </ul>
+
+<button id="toggle-style" onclick="toggleStyle()">Style</button>
