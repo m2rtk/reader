@@ -1,0 +1,22 @@
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: mvn install
+    image: maven
+    environment:
+      DEPLOY_WEBHOOK_URL:
+        from_secret: DEPLOY_WEBHOOK_URL
+      REGISTRY:
+        from_secret: REGISTRY
+      REGISTRY_USERNAME:
+        from_secret: REGISTRY_USERNAME
+      REGISTRY_PASSWORD:
+        from_secret: REGISTRY_PASSWORD
+    commands:
+      - export VERSION=$(date +"%-y.%-m.%-d").$DRONE_BUILD_NUMBER
+      - mvn -version && ls -la
+      - mvn versions:set -DnewVersion=$VERSION
+      - mvn install
+      - curl "$DEPLOY_WEBHOOK_URL:$VERSION"
