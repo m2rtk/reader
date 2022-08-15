@@ -6,13 +6,14 @@ import io.javalin.apibuilder.ApiBuilder.post
 import io.javalin.http.Cookie
 import io.javalin.http.staticfiles.Location
 import org.slf4j.LoggerFactory
+import java.nio.file.Path
 import java.util.*
 
 val CSS_OPTIONS = listOf("dark", "default")
 val CSS = CSS_OPTIONS.associateWith { getResourceAsText("/assets/$it.css") }
 
 fun main(vararg args: String) {
-    val port = args.firstOrNull()?.toInt() ?: 8080
+    val configuration = readConfiguration(*args)
     val log = LoggerFactory.getLogger("eu.m2rt.reader")
     val app: Javalin = Javalin.create {
         it.showJavalinBanner = false
@@ -38,7 +39,7 @@ fun main(vararg args: String) {
 
     WanderingInnProxy(getResourceAsText("/wandering-inn-wrapper.html")).registerRoutes(app)
 
-    val index = getResourceAsText("/index.html")
+    val trackingDatabase = CsvTrackingDatabase(Path.of(configuration.trackingDataPath))
 
     app.before {
         val style = it.cookie("style")
@@ -54,6 +55,7 @@ fun main(vararg args: String) {
         }
     }
 
+    val index = getResourceAsText("/index.html")
     app.routes {
         get { it.resultHtml(index) }
         get("/style.css") {
@@ -70,9 +72,33 @@ fun main(vararg args: String) {
                 it.cookie(Cookie("style", CSS_OPTIONS[newStyleIndex]))
             }
         }
-
+        post("/report") {
+            val reader = it.cookie("reader") ?: return@post
+            val data = it.bodyAsClass<ReaderData>()
+            val timer = Timer.start()
+            trackingDatabase.get(reader).save(data)
+            log.info("DATA: {} {} saved in {}ms", reader, data, timer.millis)
+        }
     }
 
-    app.start(port)
+    app.start(configuration.port)
 }
 
+data class Configuration(
+    val port: Int,
+    val trackingDataPath: String,
+)
+
+private fun readConfiguration(vararg args: String): Configuration {
+    val props = mutableMapOf<String, String>()
+
+    for (arg in args) {
+        val (key, value) = arg.split("=", limit = 2)
+        props[key.removePrefix("--")] = value
+    }
+
+    return Configuration(
+        props["port"]?.toInt() ?: 8080,
+        props["tracking-data-path"] ?: "",
+    )
+}
