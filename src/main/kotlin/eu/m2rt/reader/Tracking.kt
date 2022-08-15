@@ -1,9 +1,42 @@
 package eu.m2rt.reader
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import io.javalin.Javalin
+import io.javalin.apibuilder.ApiBuilder.post
+import io.javalin.core.plugin.Plugin
+import io.javalin.http.Cookie
+import org.slf4j.LoggerFactory
 import java.io.BufferedWriter
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.*
+
+class Tracking(private val trackingDatabase: TrackingDatabase) : Plugin {
+
+    companion object {
+        private val log = LoggerFactory.getLogger(Tracking::class.java)
+    }
+
+    override fun apply(app: Javalin) {
+        app.before {
+            val id = it.cookie("reader")
+
+            if (id == null) {
+                it.cookie(Cookie("reader", UUID.randomUUID().toString()))
+            }
+        }
+
+        app.routes {
+            post("/report") {
+                val reader = it.cookie("reader") ?: return@post
+                val data = it.bodyAsClass<ReaderData>()
+                val timer = Timer.start()
+                trackingDatabase.get(reader).save(data)
+                log.info("DATA: {} {} saved in {}ms", reader, data, timer.millis)
+            }
+        }
+    }
+}
 
 data class ReaderData(
     @JsonProperty("path")

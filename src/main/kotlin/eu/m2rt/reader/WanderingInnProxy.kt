@@ -2,15 +2,16 @@ package eu.m2rt.reader
 
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder
+import io.javalin.core.plugin.Plugin
 import io.javalin.http.Context
 import org.jsoup.Jsoup
 import java.net.URL
 
 class WanderingInnProxy(
-    private val wrapperHtml: String
-) {
+    private val wrapperHtml: String = getResourceAsText("/wandering-inn-wrapper.html")
+): Plugin {
 
-    fun registerRoutes(app: Javalin) {
+    override fun apply(app: Javalin) {
         app.routes {
             ApiBuilder.get("/wandering-inn") {
                 it.renderWanderingInn("https://wanderinginn.com/table-of-contents/")
