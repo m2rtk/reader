@@ -47,6 +47,7 @@ class FileBookmarks(private val directory: Path) : Bookmarks {
 
         val file = directory.resolve(filename)
 
+        Files.createDirectories(directory)
         Files.newBufferedWriter(file).use { out ->
             out.write(bookmark.path);
             out.write("\n")
