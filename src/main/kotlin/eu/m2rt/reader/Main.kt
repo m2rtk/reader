@@ -36,6 +36,7 @@ fun main(vararg args: String) {
         it.registerPlugin(Style())
         it.registerPlugin(Tracking(CsvTrackingDatabase(Path.of(configuration.trackingDataPath))))
         it.registerPlugin(WanderingInnProxy())
+        it.registerPlugin(Bookmarking(FileBookmarks(Path.of(configuration.bookmarkingDataPath))))
     }
 
     app.start(configuration.port)
@@ -44,6 +45,7 @@ fun main(vararg args: String) {
 data class Configuration(
     val port: Int,
     val trackingDataPath: String,
+    val bookmarkingDataPath: String
 )
 
 private fun readConfiguration(vararg args: String): Configuration {
@@ -57,5 +59,6 @@ private fun readConfiguration(vararg args: String): Configuration {
     return Configuration(
         props["port"]?.toInt() ?: 8080,
         props["tracking-data-path"] ?: "",
+        props["bookmarking-data-path"] ?: "",
     )
 }
