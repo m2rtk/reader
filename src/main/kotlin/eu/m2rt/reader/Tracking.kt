@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory
 import java.io.BufferedWriter
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardOpenOption.APPEND
+import java.nio.file.StandardOpenOption.CREATE
 
 class Tracking(private val trackingDatabase: TrackingDatabase) : Plugin {
 
@@ -59,11 +61,6 @@ class CsvTrackingDatabase(private val directory: Path) : TrackingDatabase {
     override fun get(user: User): TrackingDatabase.UserData {
         return cache.computeIfAbsent(user.id) {
             val path = directory.resolve("${user.id}.csv")
-
-            if (!Files.exists(path)) {
-                Files.createFile(path)
-            }
-
             CsvFile(path)
         }
     }
@@ -71,7 +68,7 @@ class CsvTrackingDatabase(private val directory: Path) : TrackingDatabase {
     inner class CsvFile(private val file: Path) : TrackingDatabase.UserData {
 
         private val out: BufferedWriter by lazy {
-            Files.newOutputStream(file).bufferedWriter()
+            Files.newOutputStream(file, APPEND, CREATE).bufferedWriter()
         }
 
         override fun save(data: ReaderData) { // todo thread safety
