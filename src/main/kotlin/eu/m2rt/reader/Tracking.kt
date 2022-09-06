@@ -4,12 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.post
 import io.javalin.core.plugin.Plugin
-import io.javalin.http.Cookie
 import org.slf4j.LoggerFactory
 import java.io.BufferedWriter
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.*
 
 class Tracking(private val trackingDatabase: TrackingDatabase) : Plugin {
 
@@ -18,21 +16,13 @@ class Tracking(private val trackingDatabase: TrackingDatabase) : Plugin {
     }
 
     override fun apply(app: Javalin) {
-        app.before {
-            val id = it.cookie("reader")
-
-            if (id == null) {
-                it.cookie(Cookie("reader", UUID.randomUUID().toString()))
-            }
-        }
-
         app.routes {
             post("/report") {
-                val reader = it.cookie("reader") ?: return@post
+                val user = it.user()
                 val data = it.bodyAsClass<ReaderData>()
                 val timer = Timer.start()
-                trackingDatabase.get(reader).save(data)
-                log.info("DATA: {} {} saved in {}ms", reader, data, timer.millis)
+                trackingDatabase.get(user).save(data)
+                log.info("DATA: {} {} saved in {}ms", user.id, data, timer.millis)
             }
         }
     }
@@ -54,7 +44,7 @@ data class ReaderData(
 )
 
 interface TrackingDatabase {
-    fun get(user: String): UserData
+    fun get(user: User): UserData
 
     interface UserData {
         fun save(data: ReaderData)
@@ -66,8 +56,8 @@ class CsvTrackingDatabase(private val directory: Path) : TrackingDatabase {
 
     private val cache = mutableMapOf<String, CsvFile>()
 
-    override fun get(user: String): TrackingDatabase.UserData {
-        return cache.computeIfAbsent(user) {
+    override fun get(user: User): TrackingDatabase.UserData {
+        return cache.computeIfAbsent(user.id) {
             val path = directory.resolve("$user.csv")
 
             if (!Files.exists(path)) {

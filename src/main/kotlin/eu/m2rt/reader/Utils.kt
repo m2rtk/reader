@@ -1,6 +1,7 @@
 package eu.m2rt.reader
 
 import io.javalin.http.Context
+import io.javalin.http.Cookie
 import org.jsoup.nodes.Element
 import java.time.Duration
 import java.time.Instant
@@ -26,6 +27,20 @@ fun Context.resultHtml(content: String) {
     result(content)
 }
 
+const val YEAR = 60 * 60 * 24 * 365
+
+fun Context.ensureCookie(name: String, valueProvider: () -> String) {
+    val existingValue = cookie(name)
+
+    cookie(
+        Cookie(
+            name = name,
+            value = existingValue ?: valueProvider.invoke(),
+            maxAge = YEAR
+        )
+    )
+}
+
 class MissingElementException(identifier: String) : RuntimeException("Missing $identifier")
 
 private fun <T> T?.orThrowMissingException(element: String): T {
@@ -45,5 +60,5 @@ class Timer private constructor(private val start: Instant = Instant.now()) {
     val millis: Long
         get() = get().toMillis()
 
-    fun get(): Duration = Duration.between(start,  Instant.now())
+    fun get(): Duration = Duration.between(start, Instant.now())
 }

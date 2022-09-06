@@ -33,6 +33,7 @@ fun main(vararg args: String) {
             )
         }
 
+        it.registerPlugin(UserIdentity())
         it.registerPlugin(Style())
         it.registerPlugin(Tracking(CsvTrackingDatabase(Path.of(configuration.trackingDataPath))))
         it.registerPlugin(WanderingInnProxy())

@@ -13,11 +13,7 @@ class Style : Plugin {
 
     override fun apply(app: Javalin) {
         app.before {
-            val style = it.cookie("style")
-
-            if (style == null) {
-                it.cookie(Cookie("style", "default"))
-            }
+            it.ensureCookie("style") { "default" }
         }
 
         app.routes {
