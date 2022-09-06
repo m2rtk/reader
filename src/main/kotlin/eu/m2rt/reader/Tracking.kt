@@ -58,7 +58,7 @@ class CsvTrackingDatabase(private val directory: Path) : TrackingDatabase {
 
     override fun get(user: User): TrackingDatabase.UserData {
         return cache.computeIfAbsent(user.id) {
-            val path = directory.resolve("$user.csv")
+            val path = directory.resolve("${user.id}.csv")
 
             if (!Files.exists(path)) {
                 Files.createFile(path)
