@@ -17,7 +17,7 @@ function createCopyButton(text) {
             method: 'POST',
             body: JSON.stringify({
                 path: window.location.pathname,
-                text: text
+                text: text + '\n'
             })
         }).then((response) => {
             if (response.ok) {
